@@ -1,0 +1,11 @@
+.idea
+common_data/
+logs/
+temp_networkx_shp_files/
+debug/
+Maps/
+Reports/
+*.db
+*.gdb
+*.npy
+Maps_Time_Commodity/
