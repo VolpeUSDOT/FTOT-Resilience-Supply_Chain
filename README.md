@@ -5,7 +5,7 @@ Freight and Fuel Transportation Optimization Tool - Supply Chain Resilience
 ## Description
 FTOT is a flexible scenario-testing tool that optimizes the transportation of materials for future energy and freight scenarios.  FTOT models and tracks commodity-specific information and can take into account conversion  of raw materials to products (e.g., crude oil to jet fuel and diesel) and the fulfillment of downstream demand. FTOT was developed at the US Dept. of Transportation's Volpe National Transportation Systems Center.
 
-FTOT-SCR is a modification of the base FTOT program to support analysis of supply chain resilience. The supply chain resilience assessment includes two parts: integrated risk assessment to capture the combined effects of multiple risk factors on supply chain performance, and resilience assessment to calculate the long-term supply chain resilience in a planning horizon. The supply chain methodology and modifications to the FTOT code were developed at Washington State University (WSU).  
+FTOT-SCR is a modification of the base FTOT program to support analysis of supply chain resilience. The supply chain resilience assessment includes two parts: integrated risk assessment to capture the combined effects of multiple risk factors on supply chain performance, and resilience assessment to calculate the long-term supply chain resilience in a planning horizon. The supply chain methodology and modifications to the FTOT code were developed at Washington State University (WSU) and utilize the 2022.2 version of FTOT.  
 
 Additional documentation developed by the WSU team explains the methodology of the risk assessment and resilience assessment. These files are available in the [docs](/docs/) directory.
 
