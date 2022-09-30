@@ -1,0 +1,1 @@
+After downloading the repository, extract the `facilities.gdb.zip` file to this folder. The folder should then contain this Markdown file, the ZIP file, and `facilities.gdb` which will appear in your file explorer as a folder.
