@@ -21,7 +21,7 @@ import os
 os.chdir("C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_data")
 
 # read CSV files to obtain fault data
-data_fault = pd.read_excel("FaultData.xlsx")
+data_fault = pd.read_csv("FaultData.csv")
 fault = pd. DataFrame (data_fault)
 data_point = pd.read_csv("point.txt")
 epicenter = pd. DataFrame (data_point)
