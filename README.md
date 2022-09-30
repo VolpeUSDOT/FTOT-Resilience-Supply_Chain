@@ -14,7 +14,9 @@ FTOT-SCR code uses the Python environment created by the main FTOT-Public reposi
 
 To install the FTOT-SCR code, clone this repository or download and unzip the code to a directory `C:\FTOT-SCR`. This is the same process as used to [download the FTOT code](https://github.com/VolpeUSDOT/FTOT-Public/wiki/FTOT-Installation-Guide#download-ftot-repository) with the different target directory.
 
-After downloading the FTOT-SCR code, navigate to the `\scenarios\ForestResiduals_SCR\input_GISdata` directory and un-zip the `facilities.gdb.zip` ZIP File there to the same directory (using the "Extract Here" option), so that the directory contains a folder called `facilities.gdb`. If there is an issue extracting the ZIP file, try downloading it again from GitHub [here](/scenarios/ForestResiduals_SCR/input_GISdata/facilities.gdb.zip) and extracting to the same `input_GISdata` folder.
+After downloading the FTOT-SCR code, navigate to the `\scenarios\ForestResiduals_SCR\input_GISdata` directory and un-zip the `facilities.gdb.zip` ZIP File there to the same directory (using the "Extract Here" option), so that the directory contains a folder called `facilities.gdb`. 
+
+_If you encounter an issue extracting the facilities ZIP file, try downloading the file again directly from GitHub [here](/scenarios/ForestResiduals_SCR/input_GISdata/facilities.gdb.zip) and extracting to the same `input_GISdata` folder._
 
 ## Running the Scenario
 The `scenarios\ForestResiduals_SCR` directory contains two batch files: setup_v5_1.bat and run_v5_1.bat . To get started, first run the `setup_v5_1.bat` file. This will initiate several Python scripts that will take the inputs described below to create several scenarios. Note that the setup script will take several hours or days to run.
