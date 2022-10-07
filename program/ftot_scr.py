@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------------------------
 # Name: ftot_scr.py
 #
-# Purpose: This module is used to organize a supply chain resilience analysis using multiple runs of the o step. .
+# Purpose: This module is used to organize a supply chain resilience analysis using multiple runs of the o step.
 #
 # ---------------------------------------------------------------------------------------------------
 
@@ -73,9 +73,9 @@ for i in range(len(number)):
 
 # END MODIFICATION
 
-FTOT_VERSION = "2022.1"
-SCHEMA_VERSION = "6.0.2"
-VERSION_DATE = "4/1/2022"
+FTOT_VERSION = "2022.2"
+SCHEMA_VERSION = "6.0.3"
+VERSION_DATE = "7/1/2022"
 
 def supply_chain_scenarios(the_scenario, logger): 
     earthquake_scenario = np.load("earthquake_events.npy")
@@ -104,10 +104,10 @@ def supply_chain_scenarios(the_scenario, logger):
     total_demand_fuel = 136497 # total demand for this supply chain layout
     total_final_demand = 4073312.9 + 254401.1 # total demand before optimization
     # Variables for output from optimization
-    #UnmetDemandAmount = np.zeros((int(WeekInYear*7),plan_horizon, N))
-    #DailyCost = np.zeros((int(WeekInYear*7),plan_horizon, N))
-    #np.save("UnmetDemandAmount.npy", UnmetDemandAmount)
-    #np.save("DailyCost.npy", DailyCost)
+    UnmetDemandAmount = np.zeros((int(WeekInYear*7),plan_horizon, N))
+    DailyCost = np.zeros((int(WeekInYear*7),plan_horizon, N))
+    np.save("UnmetDemandAmount.npy", UnmetDemandAmount)
+    np.save("DailyCost.npy", DailyCost)
 
 
     # for each scenario and time:
@@ -159,7 +159,7 @@ def supply_chain_scenarios(the_scenario, logger):
                         w2[t] = w2[t] + (float(daily_cost-initial_cost + UDP)/float(production))
 
                     else:
-                        if UDR  > 0:
+                        if UDR > 0:
                             UDP = UD * 5000
                             R1[i] = R1[i] + (float(daily_cost-initial_cost + UDP)/float(production))*7
                             w1[t] = w1[t] + (float(daily_cost-initial_cost + UDP)/float(production))
@@ -192,7 +192,7 @@ def supply_chain_scenarios(the_scenario, logger):
                 UDR = float(UD*DayInYear)/float(total_demand_fuel)
                 production = float(total_final_demand)/float(DayInYear) - UnmetDemandAmount[temp_day][t][i]
 
-                if UDR  > 0:
+                if UDR > 0:
                     UDP = UD * 5000
                     R1[i] = R1[i] + (float(daily_cost-initial_cost + UDP)/float(production))*DayInYear
                     w1[t] = w1[t] + (float(daily_cost-initial_cost + UDP)/float(production))
