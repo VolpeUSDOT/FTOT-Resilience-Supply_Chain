@@ -1,20 +1,20 @@
-# FTOT-SCR
+# FTOT-Resilience-Supply_Chain
 
 Freight and Fuel Transportation Optimization Tool - Supply Chain Resilience
 
 ## Description
-FTOT is a flexible scenario-testing tool that optimizes the transportation of materials for future energy and freight scenarios. FTOT models and tracks commodity-specific information and can take into account conversion of raw materials to products (e.g., crude oil to jet fuel and diesel) and the fulfillment of downstream demand. FTOT was developed at the US Dept. of Transportation's Volpe National Transportation Systems Center.
+[FTOT](https://volpeusdot.github.io/FTOT-Public) is a flexible scenario-testing tool that optimizes the transportation of materials for future energy and freight scenarios. FTOT models and tracks commodity-specific information and can take into account conversion of raw materials to products (e.g., crude oil to jet fuel and diesel) and the fulfillment of downstream demand. FTOT was developed at the US Dept. of Transportation's Volpe National Transportation Systems Center.
 
-FTOT-SCR is a modification of the base FTOT program to support analysis of supply chain resilience. The supply chain resilience assessment includes two parts: integrated risk assessment to capture the combined effects of multiple risk factors on supply chain performance, and resilience assessment to calculate the long-term supply chain resilience in a planning horizon. The supply chain methodology and modifications to the FTOT code were developed at Washington State University (WSU) and utilize the 2022.2 version of FTOT.
+FTOT-Resilience-Supply_Chain is a modification of the base FTOT program to support analysis of supply chain resilience. The supply chain resilience assessment includes two parts: integrated risk assessment to capture the combined effects of multiple risk factors on supply chain performance, and resilience assessment to calculate the long-term supply chain resilience in a planning horizon. The supply chain methodology and modifications to the FTOT code were developed at Washington State University (WSU) and utilize the 2022.2 version of FTOT.
 
 Additional documentation developed by the WSU team explains the methodology of the risk assessment and resilience assessment. These files are available in the [docs](/docs/) directory.
 
 ## Installation
-FTOT-SCR code uses the Python environment created by the main FTOT-Public repository. If you haven't already installed FTOT, follow [instructions](https://volpeusdot.github.io/FTOT-Public) from the main FTOT landing page to install FTOT, install supporting Python packages, and set up the Python environment.
+FTOT-Resilience-Supply_Chain code uses the Python environment created by the main FTOT-Public repository. If you haven't already installed FTOT, follow [instructions](https://volpeusdot.github.io/FTOT-Public/#getting-started) from the main FTOT landing page to install FTOT, install supporting Python packages, and set up the Python environment.
 
-To install the FTOT-SCR code, clone this repository or download and unzip the code to a directory called `C:\FTOT-SCR`. This is the same process as used to download the FTOT code but with a different target directory.
+To install the FTOT-Resilience-Supply_Chain code, clone this repository or download and unzip the code to a directory called `C:\FTOT-SCR`. This is the same process as used to download the FTOT code but with a different target directory.
 
-After downloading the FTOT-SCR code, navigate to the `\scenarios\ForestResiduals_SCR\input_GISdata` directory and un-zip the `facilities.gdb.zip` ZIP File there to the same directory (using the "Extract Here" option), so that the directory contains a folder called `facilities.gdb`.
+After downloading the FTOT-Resilience-Supply_Chain code, navigate to the `\scenarios\ForestResiduals_SCR\input_GISdata` directory and un-zip the `facilities.gdb.zip` ZIP File there to the same directory (using the "Extract Here" option), so that the directory contains a folder called `facilities.gdb`.
 
 _If you encounter an issue extracting the facilities ZIP file, try downloading the file again directly from GitHub [here](/scenarios/ForestResiduals_SCR/input_GISdata/facilities.gdb.zip) and extracting to the same `input_GISdata` folder._
 
@@ -25,7 +25,7 @@ After finishing the set up scripts, run the batch file called `run_v5_1.bat` in 
 * If desired, a user can reduce the number of scenarios and years in each scenario by modifying the `N` and `plan_horizon` variables in the `ftot_scr.py` file in the `/program` folder. The default value is 30 scenarios, each 20 years long.
 
 ### Set-up Scripts
-FTOT-SCR’s `setup_v5_1.bat` file runs a sequence of six set up scripts. The inputs and outputs for each script are included in the table below. The output files of each script either serve as an input for a later script or are inputs necessary to run an FTOT-SCR scenario.
+FTOT-Resilience-Supply_Chain’s `setup_v5_1.bat` file runs a sequence of six set up scripts. The inputs and outputs for each script are included in the table below. The output files of each script either serve as an input for a later script or are inputs necessary to run an FTOT-Resilience-Supply_Chain scenario.
 
 File | Inputs | Outputs
 --- | --- | ---
@@ -37,7 +37,7 @@ File | Inputs | Outputs
 `6_RepairTimeCost.py` | Relationship_BridgeRoad_3state.txt <br> seismic_catalog.npy <br> earthquake_events.npy <br> BDI.npy <br> bridge_DS.npy <br> edge_cap.npy <br> facility_cap.npy <br> facility_DS.npy | repair_costs.npy <br> repair_time_edge.npy <br> repair_time_facility.npy <br> total_repair_time.npy
 
 ### Interpreting Results
-As each scenario finishes, several summary statistics will be printed in the command line and logged. After a full run of the FTOT-SCR tool, the resilience results from the full suite of scenarios can be viewed through the Numpy files:
+As each scenario finishes, several summary statistics will be printed in the command line and logged. After a full run of the FTOT-Resilience-Supply_Chain tool, the resilience results from the full suite of scenarios can be viewed through the Numpy files:
 * `Resilience.npy` for the overall resilience metric.
 * `R1.npy` and `weight1.npy` for the value and weight of hazard-induced losses,
 * `R2.npy` and `weight2.npy` for the value and weight of non-hazard-induced losses,
