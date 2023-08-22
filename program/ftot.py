@@ -18,7 +18,8 @@ from pint import UnitRegistry
 
 ureg = UnitRegistry()
 Q_ = ureg.Quantity
-ureg.define('usd = [currency]')  # add the US Dollar, "USD" to the unit registry
+ureg.define('thousand_gallon = kgal')
+
 # solves issue in pint 0.9
 if pint.__version__ == 0.9:
     ureg.define('short_hundredweight = short_hunderdweight')
@@ -26,9 +27,9 @@ if pint.__version__ == 0.9:
     ureg.define('us_ton = US_ton')
 
 
-FTOT_VERSION = "2022.1"
-SCHEMA_VERSION = "6.0.2"
-VERSION_DATE = "4/1/2022"
+FTOT_VERSION = "2023.2"
+SCHEMA_VERSION = "7.0.2"
+VERSION_DATE = "7/14/2023"
 
 # ===================================================================================================
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     # PARSE ARGS
     # ----------------------------------------------------------------------------------------------
 
-    program_description = 'Freight/Fuels Transportation Optimization Tool (FTOT). Version Number: ' \
+    program_description = 'Freight and Fuel Transportation Optimization Tool (FTOT). Version Number: ' \
                           + FTOT_VERSION + ", (" + VERSION_DATE + ")"
 
     help_text = """
@@ -56,7 +57,7 @@ if __name__ == '__main__':
             f  = facilities; process GIS feature classes and commodity input CSV files
             c  = connectivity; connects facilities to the network using artificial links and exports geodatabase FCs as 
             shapefiles
-            g  = graph; reads in shapefiles using networkX and prepares, cleans, and stores the network digraph in the 
+            g  = graph; reads in shapefiles using networkX and prepares, cleans, and stores the network digraph in the
             database
             
             # optimization options
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument("task", choices=("s", "f", "f2", "c", "c2", "g", "g2",
                                          "o", "oc",
                                          "o1", "o2", "o2b", "oc1", "oc2", "oc2b", "oc3", "oscr", "os", "p",
-                                         "d", "m", "mb", "mc", "md", "m2", "m2b", "m2c", "m2d"
+                                         "d", "m", "mb", "mc", "md", "m2", "m2b", "m2c", "m2d",
                                          "test"
                                          ), type=str)
     parser.add_argument('-skip_arcpy_check', action='store_true',
