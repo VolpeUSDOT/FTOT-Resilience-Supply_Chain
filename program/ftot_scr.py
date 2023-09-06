@@ -1311,7 +1311,7 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
 
 # ===============================================================================
 
-def save_pulp_solution(the_scenario, prob, logger, zero_threshold):
+def save_pulp_solution(the_scenario, prob, logger, time_period, zero_threshold):
     
     # BEGIN MODIFICATION - logging
     i = np.load("scenario_num.npy")
