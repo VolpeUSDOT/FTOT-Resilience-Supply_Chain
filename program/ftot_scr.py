@@ -75,17 +75,17 @@ for i in range(len(number)):
 
 FTOT_VERSION = "2023.2"
 SCHEMA_VERSION = "7.0.2"
-VERSION_DATE = "7/14/2023"
+VERSION_DATE = "9/30/2023"
 
 def supply_chain_scenarios(the_scenario, logger): 
     earthquake_scenario = np.load("earthquake_events.npy")
     total_repair_time = np.load("total_repair_time.npy")
 
     total_fuel_amount = 2941633.8
-    # planning horizon in this example: 20 years
-    plan_horizon = 20 # unit: year
-    # total scenario amount:  here we consider 30 scenarios
-    N = 30
+    # planning horizon in this example: 5 years
+    plan_horizon = 5 # unit: year
+    # total scenario amount:  here we consider 5 scenarios
+    N = 5
     # resilience array
     Resilience = np.zeros((N))
     R1 = np.zeros((N))

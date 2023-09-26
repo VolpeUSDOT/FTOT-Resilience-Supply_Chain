@@ -12,7 +12,7 @@ REM =================================================
 REM ==============================================
 REM ======== ENVIRONMENT VARIABLES ===============
 REM ==============================================
-set PYTHON="C:\FTOT\python3_env_Kevin\python.exe"
+set PYTHON="C:\FTOT\python3_env\python.exe"
 set FTOT="c:\FTOT-SCR\program\ftot.py"
 set XMLSCENARIO="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\scenario.xml"
 
