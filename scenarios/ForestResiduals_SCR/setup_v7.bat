@@ -1,4 +1,3 @@
-
 @ECHO OFF
 cls
 set PYTHONDONTWRITEBYTECODE=1 
@@ -10,14 +9,13 @@ REM ==============================================
 REM =========== ENVIRONMENT VARIABLES ============
 REM ==============================================
 set PYTHON="C:\FTOT\python3_env\python.exe"
-set FTOT="c:\ftot-scr\program\ftot.py"
-set XMLSCENARIO="C:\ftot-SCR\scenarios\ForestResiduals_SCR\scenario.xml"
-set SETUP_SEISMIC="C:\ftot-SCR\scenarios\ForestResiduals_SCR\1_SeismicEvents.py"
-set SETUP_SCENARIO="C:\ftot-SCR\scenarios\ForestResiduals_SCR\2_ScenarioGeneration.py"
-set SETUP_FACILITY="C:\ftot-SCR\scenarios\ForestResiduals_SCR\3_FacilityCapacity.py"
-set SETUP_BRIDGE="C:\ftot-SCR\scenarios\ForestResiduals_SCR\4_BridgeDamage.py"
-set SETUP_EDGE="C:\ftot-SCR\scenarios\ForestResiduals_SCR\5_EdgeCapacity.py"
-set SETUP_REPAIR="C:\ftot-SCR\scenarios\ForestResiduals_SCR\6_RepairTimeCost.py"
+set FTOT="c:\FTOT-SCR\program\ftot.py"
+set SETUP_SEISMIC="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\1_SeismicEvents.py"
+set SETUP_SCENARIO="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\2_ScenarioGeneration.py"
+set SETUP_FACILITY="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\3_FacilityCapacity.py"
+set SETUP_BRIDGE="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\4_BridgeDamage.py"
+set SETUP_EDGE="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\5_EdgeCapacity.py"
+set SETUP_REPAIR="C:\FTOT-SCR\scenarios\ForestResiduals_SCR\6_RepairTimeCost.py"
 
 
 REM ==============================================

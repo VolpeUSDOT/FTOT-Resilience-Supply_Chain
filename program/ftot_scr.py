@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------------------------
 # Name: ftot_scr.py
 #
-# Purpose: This module is used to organize a supply chain resilience analysis using multiple runs of the o step.
+# Purpose: This module is used to organize a supply chain resilience analysis using multiple runs of the o step. .
 #
 # ---------------------------------------------------------------------------------------------------
 
@@ -73,19 +73,19 @@ for i in range(len(number)):
 
 # END MODIFICATION
 
-FTOT_VERSION = "2022.2"
-SCHEMA_VERSION = "6.0.3"
-VERSION_DATE = "7/1/2022"
+FTOT_VERSION = "2023.2"
+SCHEMA_VERSION = "7.0.2"
+VERSION_DATE = "9/30/2023"
 
 def supply_chain_scenarios(the_scenario, logger): 
     earthquake_scenario = np.load("earthquake_events.npy")
     total_repair_time = np.load("total_repair_time.npy")
 
     total_fuel_amount = 2941633.8
-    # planning horizon in this example: 20 years
-    plan_horizon = 20 # unit: year
-    # total scenario amount:  here we consider 30 scenarios
-    N = 30
+    # planning horizon in this example: 5 years
+    plan_horizon = 5 # unit: year
+    # total scenario amount:  here we consider 5 scenarios
+    N = 5
     # resilience array
     Resilience = np.zeros((N))
     R1 = np.zeros((N))
@@ -159,7 +159,7 @@ def supply_chain_scenarios(the_scenario, logger):
                         w2[t] = w2[t] + (float(daily_cost-initial_cost + UDP)/float(production))
 
                     else:
-                        if UDR > 0:
+                        if UDR  > 0:
                             UDP = UD * 5000
                             R1[i] = R1[i] + (float(daily_cost-initial_cost + UDP)/float(production))*7
                             w1[t] = w1[t] + (float(daily_cost-initial_cost + UDP)/float(production))
@@ -192,7 +192,7 @@ def supply_chain_scenarios(the_scenario, logger):
                 UDR = float(UD*DayInYear)/float(total_demand_fuel)
                 production = float(total_final_demand)/float(DayInYear) - UnmetDemandAmount[temp_day][t][i]
 
-                if UDR > 0:
+                if UDR  > 0:
                     UDP = UD * 5000
                     R1[i] = R1[i] + (float(daily_cost-initial_cost + UDP)/float(production))*DayInYear
                     w1[t] = w1[t] + (float(daily_cost-initial_cost + UDP)/float(production))
@@ -385,7 +385,7 @@ def generate_all_vertices(the_scenario, schedule_dict, schedule_length, time_per
         create index if not exists nx_edge_index on
         networkx_edges(from_node_id, to_node_id,
         artificial, mode_source, mode_source_OID,
-        miles, route_cost_scaling, capacity)
+        length, route_cost_scaling, capacity)
         ;
         """)
 
@@ -668,99 +668,6 @@ def generate_all_vertices(the_scenario, schedule_dict, schedule_length, time_per
 # ===============================================================================
 
 
-def set_edges_volume_capacity(the_scenario, logger):
-    logger.info("starting set_edges_volume_capacity")
-    with sqlite3.connect(the_scenario.main_db) as main_db_con:
-        logger.debug("starting to record volume and capacity for non-pipeline edges")
-
-        main_db_con.execute(
-            "update edges set volume = (select ifnull(ne.volume,0) from networkx_edges ne "
-            "where ne.edge_id = edges.nx_edge_id ) where simple_mode in ('rail','road','water');")
-        main_db_con.execute(
-            "update edges set max_edge_capacity = (select ne.capacity from networkx_edges ne "
-            "where ne.edge_id = edges.nx_edge_id) where simple_mode in ('rail','road','water');")
-        logger.debug("volume and capacity recorded for non-pipeline edges")
-
-        logger.debug("starting to record volume and capacity for pipeline edges")
-        ##
-        main_db_con.executescript("""update edges set volume =
-        (select l.background_flow
-         from pipeline_mapping pm,
-         (select id_field_name, cn.source_OID as link_id, min(cn.capacity) capac,
-        max(cn.volume) background_flow, source
-        from capacity_nodes cn
-        where cn.id_field_name = 'MASTER_OID'
-        and ifnull(cn.capacity,0)>0
-        group by link_id) l
-
-        where edges.tariff_id = pm.id
-        and pm.id_field_name = 'tariff_ID'
-        and pm.mapping_id_field_name = 'MASTER_OID'
-        and l.id_field_name = 'MASTER_OID'
-        and pm.mapping_id = l.link_id
-        and instr(edges.mode, l.source)>0)
-         where simple_mode = 'pipeline'
-        ;
-
-        update edges set max_edge_capacity =
-        (select l.capac
-        from pipeline_mapping pm,
-        (select id_field_name, cn.source_OID as link_id, min(cn.capacity) capac,
-        max(cn.volume) background_flow, source
-        from capacity_nodes cn
-        where cn.id_field_name = 'MASTER_OID'
-        and ifnull(cn.capacity,0)>0
-        group by link_id) l
-
-        where edges.tariff_id = pm.id
-        and pm.id_field_name = 'tariff_ID'
-        and pm.mapping_id_field_name = 'MASTER_OID'
-        and l.id_field_name = 'MASTER_OID'
-        and pm.mapping_id = l.link_id
-        and instr(edges.mode, l.source)>0)
-        where simple_mode = 'pipeline'
-        ;""")
-        logger.debug("volume and capacity recorded for pipeline edges")
-        logger.debug("starting to record units and conversion multiplier")
-        main_db_con.execute("""update edges
-        set capacity_units =
-        (case when simple_mode = 'pipeline' then 'kbarrels'
-        when simple_mode = 'road' then 'truckload'
-        when simple_mode = 'rail' then 'railcar'
-        when simple_mode = 'water' then 'barge'
-        else 'unexpected mode' end)
-        ;""")
-        main_db_con.execute("""update edges
-        set units_conversion_multiplier =
-        (case when simple_mode = 'pipeline' and phase_of_matter = 'liquid' then {}
-        when simple_mode = 'road'  and phase_of_matter = 'liquid' then {}
-        when simple_mode = 'road'  and phase_of_matter = 'solid' then {}
-        when simple_mode = 'rail'  and phase_of_matter = 'liquid' then {}
-        when simple_mode = 'rail'  and phase_of_matter = 'solid' then {}
-        when simple_mode = 'water'  and phase_of_matter = 'liquid' then {}
-        when simple_mode = 'water'  and phase_of_matter = 'solid' then {}
-        else 1 end)
-        ;""".format(THOUSAND_GALLONS_PER_THOUSAND_BARRELS,
-                    the_scenario.truck_load_liquid.magnitude,
-                    the_scenario.truck_load_solid.magnitude,
-                    the_scenario.railcar_load_liquid.magnitude,
-                    the_scenario.railcar_load_solid.magnitude,
-                    the_scenario.barge_load_liquid.magnitude,
-                    the_scenario.barge_load_solid.magnitude,
-                    ))
-        logger.debug("units and conversion multiplier recorded for all edges; starting capacity minus volume")
-        main_db_con.execute("""update edges
-        set capac_minus_volume_zero_floor =
-        365*max((select (max_edge_capacity - ifnull(volume,0)) where  max_edge_capacity is not null),0)
-        where  max_edge_capacity is not null
-        ;""")
-        logger.debug("capacity minus volume (minimum set to zero) recorded for all edges")
-    return
-
-
-# ===============================================================================
-
-
 def create_unmet_demand_vars(the_scenario, logger):
     logger.info("START: create_unmet_demand_vars")
     demand_var_list = []
@@ -769,7 +676,7 @@ def create_unmet_demand_vars(the_scenario, logger):
     with sqlite3.connect(the_scenario.main_db) as main_db_con:
         db_cur = main_db_con.cursor()
         for row in db_cur.execute("""select v.facility_id, v.schedule_day, 
-        ifnull(c.supertype, c.commodity_name) top_level_commodity_name, v.udp
+         ifnull(c.supertype, c.commodity_name) top_level_commodity_name, v.udp
          from vertices v, commodities c, facility_type_id ft, facilities f
          where v.commodity_id = c.commodity_id
          and ft.facility_type = "ultimate_destination"
@@ -848,11 +755,11 @@ def create_opt_problem(logger, the_scenario, unmet_demand_vars, flow_vars, proce
         logger.debug("number of candidate processors from proc.csv = {}".format(input_candidates))
 
         if input_candidates > 0:
-            #force ignore_facility = 'false' for processors input from file; it should always be set to false anyway
+            # force ignore_facility = 'false' for processors input from file; it should always be set to false anyway
             input_processor_build_cost = db_cur.execute("""
             select f.facility_id,  f.build_cost
             from facilities f
-                INNER JOIN facility_type_id ft ON f.facility_type_id = ft.facility_type_id
+            inner join facility_type_id ft ON f.facility_type_id = ft.facility_type_id
             where candidate = 1 and build_cost>0
             and facility_type = 'processor'
             and ifnull(ignore_facility, 'false') = 'false'
@@ -880,13 +787,13 @@ def create_opt_problem(logger, the_scenario, unmet_demand_vars, flow_vars, proce
 
 def create_constraint_daily_processor_capacity(logger, the_scenario, prob, flow_var, processor_build_vars,
                                                processor_daily_flow_vars, time_period):
-    logger.debug("STARTING:  create_constraint_daily_processor_capacity")
+    logger.debug("STARTING: create_constraint_daily_processor_capacity")
     # primary vertices only
     # flow into vertex is capped at facility max_capacity per day
     # sum over all input commodities, grouped by day and facility
     # conservation of flow and ratios are handled in other methods
 
-    ### get primary processor vertex and its input quantityi
+    ### get primary processor vertex and its input quantity
     total_scenario_min_capacity = 0
 
     # BEGIN MODIFICATION - logging
@@ -902,7 +809,8 @@ def create_constraint_daily_processor_capacity(logger, the_scenario, prob, flow_
     with sqlite3.connect(the_scenario.main_db) as main_db_con:
         db_cur = main_db_con.cursor()
         sql = """select f.facility_id,
-        ifnull(f.candidate, 0), ifnull(f.max_capacity, -1), v.schedule_day, v.activity_level
+        ifnull(f.candidate, 0), ifnull(f.max_capacity_ratio, -1), v.schedule_day, v.activity_level,
+        ifnull(f.min_capacity_ratio, -1), fc.units, sum(fc.quantity) quant_for_capacity
         from facility_commodities fc, facility_type_id ft, facilities f, vertices v
         where ft.facility_type = 'processor'
         and ft.facility_type_id = f.facility_type_id
@@ -910,11 +818,12 @@ def create_constraint_daily_processor_capacity(logger, the_scenario, prob, flow_
         and fc.io = 'i'
         and v.facility_id = f.facility_id
         and v.storage_vertex = 0
-        group by f.facility_id, ifnull(f.candidate, 0), f.max_capacity, v.schedule_day, v.activity_level
+        group by f.facility_id, ifnull(f.candidate, 0), ifnull(f.max_capacity_ratio, -1), v.schedule_day, v.activity_level, ifnull(f.min_capacity_ratio, -1), fc.units
         ;
         """
         # iterate through processor facilities, one constraint per facility per day
         # no handling of subcommodities
+        # one set of constraints per commodity unit, because we don't want to convert flow variables on the fly
 
         processor_facilities = db_cur.execute(sql)
 
@@ -940,37 +849,47 @@ def create_constraint_daily_processor_capacity(logger, the_scenario, prob, flow_
             
             day = row_a[3]
             daily_activity_level = row_a[4]
+            min_capacity = row_a[5]*row_a[7]
+            units = row_a[6]
+            quant_for_capacity = row_a[7]
 
-            if max_capacity >= 0:
-                daily_inflow_max_capacity = float(max_capacity) * float(daily_activity_level)
-                daily_inflow_min_capacity = daily_inflow_max_capacity / 2
-                logger.debug(
-                    "processor {}, day {},  input capacity min: {} max: {}".format(facility_id, day, daily_inflow_min_capacity,
-                                                                             daily_inflow_max_capacity))
-                total_scenario_min_capacity = total_scenario_min_capacity + daily_inflow_min_capacity
-                flow_in = []
-
+            if max_capacity >= 0 or min_capacity >= 0:
                 # all edges that end in that processor facility primary vertex, on that day
+                # calculate if either capacity constraint applies
+                flow_in = []
                 db_cur2 = main_db_con.cursor()
-                for row_b in db_cur2.execute("""select edge_id from edges e, vertices v
+                for row_b in db_cur2.execute("""select edge_id from edges e, vertices v, facility_commodities fc
                 where e.start_day = {}
                 and e.d_vertex_id = v.vertex_id
                 and v.facility_id = {}
                 and v.storage_vertex = 0
-                group by edge_id""".format(day, facility_id)):
+                and fc.commodity_id = e.commodity_id
+                and fc.units = '{}'
+                group by edge_id""".format(day, facility_id, units)):
                     input_edge_id = row_b[0]
-                    flow_in.append(flow_var[input_edge_id])
 
+                    flow_in.append(flow_var[input_edge_id])
                 logger.debug(
-                    "flow in for capacity constraint on processor facility {} day {}: {}".format(facility_id, day, flow_in))
-                prob += lpSum(flow_in) <= daily_inflow_max_capacity * processor_daily_flow_vars[(facility_id, day)], \
-                        "constraint max flow into processor facility {}, day {}, flow var {}".format(
-                            facility_id, day, processor_daily_flow_vars[facility_id, day])
+                    "flow in for capacity constraint on processor facility {} day {} units {}: {}".format(facility_id, day, units, flow_in))
+
+                # capacity is set to -1 if there is no restriction, so should be no constraint
+                if min_capacity >= 0:
+                    daily_inflow_min_capacity = float(min_capacity) * float(daily_activity_level)
+                if max_capacity >= 0:
+                    daily_inflow_max_capacity = float(max_capacity) * float(daily_activity_level)
+                    prob += lpSum(flow_in) <= daily_inflow_max_capacity * processor_daily_flow_vars[(facility_id, day)], \
+                        "constraint max flow into processor facility {}, day {}, units {}, flow var {}".format(
+                            facility_id, day, units, processor_daily_flow_vars[facility_id, day])
+                    if min_capacity < 0:
+                        # this is just to match the current default - if min is not specified, use half max
+                        daily_inflow_min_capacity = daily_inflow_max_capacity / 2
+                logger.debug(
+                    "processor {}, day {}, units {}, input capacity min: {} max: {}".format(facility_id, day, units, daily_inflow_min_capacity,
+                                                                             daily_inflow_max_capacity))
+                total_scenario_min_capacity = total_scenario_min_capacity + daily_inflow_min_capacity
 
                 prob += lpSum(flow_in) >= daily_inflow_min_capacity * processor_daily_flow_vars[
-                    (facility_id, day)], "constraint min flow into processor {}, day {}".format(facility_id, day)
-            # else:
-            #     pdb.set_trace()
+                    (facility_id, day)], "constraint min flow into processor {}, day {}, units {}".format(facility_id, day, units)
 
             if is_candidate == 1:
                 # forces processor build var to be correct
@@ -979,15 +898,12 @@ def create_constraint_daily_processor_capacity(logger, the_scenario, prob, flow_
                     (facility_id, day)], "constraint forces processor build var to be correct {}, {}".format(
                     facility_id, processor_build_vars[facility_id])
 
-    logger.debug("FINISHED:  create_constraint_daily_processor_capacity")
+    logger.debug("FINISHED: create_constraint_daily_processor_capacity")
     return prob
 
-
 # ===============================================================================
-
-
 def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow_var):
-    logger.debug("STARTING:  create_primary_processor_vertex_constraints - conservation of flow")
+    logger.debug("STARTING: create_primary_processor_vertex_constraints - conservation of flow")
     # for all of these vertices, flow in always  == flow out
     # node_counter = 0
     # node_constraint_counter = 0
@@ -1005,7 +921,7 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
         # total flow in == total flow out, subject to conversion;
         # dividing by "required quantity" functionally converts all commodities to the same "processor-specific units"
 
-        # processor primary vertices with input commodity and  quantity needed to produce specified output quantities
+        # processor primary vertices with input commodity and quantity needed to produce specified output quantities
         # 2 sets of constraints; one for the primary processor vertex to cover total flow in and out
         # one for each input and output commodity (sum over sources) to ensure its ratio matches facility_commodities
 
@@ -1094,11 +1010,11 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
             edge_id = row_a[5]
             # nx_edge_id = row_a[6]
             
+            # BEGIN MODIFICATION - replaces commented out facility id and quantity = 
             facility_id = row_a[8]
-            
-            # MODIFICATION - replaces quantity = 
             quantity = facility_cap_noEarthquake[int(facility_id)-1][t+1][i]*float(row_a[7])
-
+            # END MODIFICATION
+            
             # commodity_name = row_a[9]
             # fc_io_commodity = row_a[10]
             # activity_level = row_a[11]
@@ -1136,16 +1052,15 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
 
         # 1----------------------------------------------------------------------
         constrained_input_flow_vars = set([])
-        # pdb.set_trace()
 
         for key, value in iteritems(flow_out_lists):
-            #value is a dictionary with commodity & source as keys
+            # value is a dictionary with commodity & source as keys
             # set up a dictionary that will be filled with input lists to check ratio against
             compare_input_dict = {}
             compare_input_dict_commod = {}
             vertex_id = key
             zero_in = False
-            #value is a dictionary keyed on output commodity, quantity required, edge source
+            # value is a dictionary keyed on output commodity, quantity required, edge source
             if vertex_id in flow_in_lists:
                 in_quantity = 0
                 in_commodity_id = 0
@@ -1155,16 +1070,15 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
                     in_quantity = ikey[1]
                     in_source = ikey[2]
                     # list of edges
-                    compare_input_dict[in_source] = ivalue
+                    compare_input_dict[in_source] = ivalue # this doesn't save all edges for a source if not source tracking
                     # to accommodate and track multiple input commodities; does not keep sources separate
                     # aggregate lists over sources, by commodity
-                    if in_commodity_id not in compare_input_dict_commod.keys():
-                        compare_input_dict_commod[in_commodity_id] = set([])
+                    if (in_commodity_id, in_quantity) not in compare_input_dict_commod.keys():
+                        compare_input_dict_commod[(in_commodity_id, in_quantity)] = set([])
                     for edge in ivalue:
-                        compare_input_dict_commod[in_commodity_id].add(edge)
+                        compare_input_dict_commod[(in_commodity_id, in_quantity)].add(edge)
             else:
                 zero_in = True
-
 
             # value is a dict - we loop once here for each output commodity and source at the vertex
             for key2, value2 in iteritems(value):
@@ -1181,7 +1095,7 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
                 match_source = inherit_max_transport[out_commodity_id]
                 compare_input_list = []
                 if match_source == 'Y':
-                    if len(list(compare_input_dict_commod.keys())) > 1:
+                    if len(compare_input_dict_commod.keys()) > 1:
                         error = "Multiple input commodities for processors and shared max transport distance are" \
                                 " not supported within the same scenario."
                         logger.error(error)
@@ -1210,10 +1124,9 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
                             constrained_input_flow_vars.add(flow_var)
                     else:
                         for k, v in iteritems(compare_input_dict_commod):
-                            # pdb.set_trace()
                             # as long as the input source doesn't match an output that needs to inherit
                             compare_input_list = list(v)
-                            in_commodity_id = k
+                            in_commodity_id, in_quantity = k
                             # ratio constraint for this output commodity relative to total input of each commodity
                             required_flow_out = lpSum(flow_var_list) / out_quantity
                             # check against an input dict
@@ -1239,14 +1152,14 @@ def create_primary_processor_vertex_constraints(logger, the_scenario, prob, flow
                                                "commodity {} with source {}".format(
                             vertex_id, commodity_id, source)
 
-    logger.debug("FINISHED:  create_primary_processor_conservation_of_flow_constraints")
+    logger.debug("FINISHED: create_primary_processor_conservation_of_flow_constraints")
     return prob
 
 
 # ===============================================================================
 
 def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
-    logger.info("STARTING:  create_constraint_max_route_capacity")
+    logger.info("STARTING: create_constraint_max_route_capacity")
     logger.info("modes with background flow turned on: {}".format(the_scenario.backgroundFlowModes))
     # min_capacity_level must be a number from 0 to 1, inclusive
     # min_capacity_level is only relevant when background flows are turned on
@@ -1255,7 +1168,7 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
     # even if "volume" would otherwise restrict it further
     # min_capacity_level = 0 allows a route to be made unavailable for FTOT flow if base volume is too high
     # this currently applies to all modes
-
+    
     # BEGIN MODIFICATION - logging
     i = np.load("scenario_num.npy")
     t = np.load("time_horizon.npy")
@@ -1264,7 +1177,7 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
     logger.info("time horizon {}".format(t))
     logger.info("earthquake week {}".format(j))
     # END MODIFICATION
-    
+     
     logger.info("minimum available capacity floor set at: {}".format(the_scenario.minCapacityLevel))
 
     with sqlite3.connect(the_scenario.main_db) as main_db_con:
@@ -1311,7 +1224,7 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
         logger.debug("route_capacity constraints created for all storage routes")
 
         # capacity for transport routes
-        # Assumption - all flowing material is in kgal, all flow is summed on a single non-pipeline nx edge
+        # Assumption - all flowing material is in thousand_gallon, all flow is summed on a single non-pipeline nx edge
         sql = """select e.edge_id, e.nx_edge_id, e.max_edge_capacity, e.start_day, e.simple_mode, e.phase_of_matter,
          e.capac_minus_volume_zero_floor
         from edges e
@@ -1350,11 +1263,11 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
             else:
                 use_capacity = nx_edge_capacity
 
-            # flow is in thousand gallons (kgal), for liquid, or metric tons, for solid
+            # flow is in thousand gallons, for liquid, or metric tons, for solid
             # capacity is in truckload, rail car, barge, or pipeline movement per day
-            # if mode is road and phase is liquid, capacity is in truckloads per day, we want it in kgal
-            # ftot_supporting_gis tells us that there are 8 kgal per truckload,
-            # so capacity * 8 gives us correct units or kgal per day
+            # if mode is road and phase is liquid, capacity is in truckloads per day, we want it in thousand_gallon
+            # ftot_supporting_gis tells us that there are 8 thousand_gallon per truckload,
+            # so capacity * 8 gives us correct units or thousand_gallon per day
             # => use capacity * ftot_supporting_gis multiplier to get capacity in correct flow units
 
             multiplier = 1  # if units match, otherwise specified here
@@ -1383,7 +1296,7 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
             #logger.info("capacity_reduction_index {}".format(capacity_reduction_index))
             converted_capacity = use_capacity * multiplier * capacity_reduction_index
 
-            #converted_capacity = use_capacity * multiplier
+            # converted_capacity = use_capacity * multiplier
             # END MODIFICATION
 
             flow_lists.setdefault((nx_edge_id, converted_capacity, start_day), []).append(flow_var[edge_id])
@@ -1393,13 +1306,13 @@ def create_constraint_max_route_capacity(logger, the_scenario, prob, flow_var):
 
         logger.debug("route_capacity constraints created for all non-pipeline  transport routes")
 
-    logger.debug("FINISHED:  create_constraint_max_route_capacity")
+    logger.debug("FINISHED: create_constraint_max_route_capacity")
     return prob
-
 
 # ===============================================================================
 
-def save_pulp_solution(the_scenario, prob, logger,  time_period, zero_threshold):
+def save_pulp_solution(the_scenario, prob, logger, time_period, zero_threshold):
+    
     # BEGIN MODIFICATION - logging
     i = np.load("scenario_num.npy")
     t = np.load("time_horizon.npy")
@@ -1409,7 +1322,7 @@ def save_pulp_solution(the_scenario, prob, logger,  time_period, zero_threshold)
         j = np.load("earthquake_week.npy")
         logger.info("earthquake week {}".format(j))
     # END MODIFICATION
-    
+
     import datetime
     start_time = datetime.datetime.now()
     logger.info("START: save_pulp_solution")
@@ -1418,7 +1331,7 @@ def save_pulp_solution(the_scenario, prob, logger,  time_period, zero_threshold)
     with sqlite3.connect(the_scenario.main_db) as db_con:
 
         db_cur = db_con.cursor()
-        # drop  the optimal_solution table
+        # drop the optimal_solution table
         # -----------------------------
         db_cur.executescript("drop table if exists optimal_solution;")
 
@@ -1454,7 +1367,11 @@ def save_pulp_solution(the_scenario, prob, logger,  time_period, zero_threshold)
         sql = "select count(variable_name) from optimal_solution where variable_name like 'UnmetDemand%';"
         data = db_con.execute(sql)
         optimal_unmet_demand_count = data.fetchone()[0]
-
+        logger.info("number facilities with optimal_unmet_demand : {}".format(optimal_unmet_demand_count))
+        sql = "select ifnull(sum(variable_value),0) from optimal_solution where variable_name like 'UnmetDemand%';"
+        data = db_con.execute(sql)
+        optimal_unmet_demand_sum = data.fetchone()[0]
+        
         # BEGIN MODIFICATION - save unmet demand
         if time_period == "yearly":
             unmet_demand_yearly = optimal_unmet_demand_sum
@@ -1469,154 +1386,20 @@ def save_pulp_solution(the_scenario, prob, logger,  time_period, zero_threshold)
             unmet_demand_daily = optimal_unmet_demand_sum
             np.save("unmet_demand_daily.npy", unmet_demand_daily)
             logger.info("Repair Cost : {}".format(repair_costs[int(j*7)][t][i]))
-        # END MODIFICATION  
-
-        logger.info("number facilities with optimal_unmet_demand : {}".format(optimal_unmet_demand_count))
-        sql = "select ifnull(sum(variable_value),0) from optimal_solution where variable_name like 'UnmetDemand%';"
-        data = db_con.execute(sql)
-        optimal_unmet_demand_sum = data.fetchone()[0]
-        logger.info("Total Unmet Demand : {}".format(optimal_unmet_demand_sum))
-
-        # MODIFICATION - add catalyst replacement
-        logger.info("Catalyst Replacement : {}".format(sum(CatalystReplace_cost[:,t+1,i])))
-
-        logger.info("Penalty per unit of Unmet Demand : ${0:,.0f}".format(the_scenario.unMetDemandPenalty))
-        logger.info("Total Cost of Unmet Demand : \t ${0:,.0f}".format(
-            optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty))
-
-        # BEGIN MODFIICATION 
-        if optimal_unmet_demand_sum < 0:
-            costs_daily = abs(float(value(prob.objective))- optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty) + sum(CatalystReplace_cost[:,t+1,i])*daily_index + operation_cost*((1.03)**(t+13))*daily_index + repair_costs[int(j*7)][t][i]
-
-            logger.result(
-                "Total Scenario Cost = (transportation + processor construction + operation + catalyst replacement): \t ${0:,.0f}"
-                "".format(costs_daily))
-        else:
-            costs_daily = abs(float(value(prob.objective))-optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty)+sum(CatalystReplace_cost[:,t+1,i])*daily_index +operation_cost*((1.03)**(t+13))*daily_index + repair_costs[int(j*7)][t][i] + optimal_unmet_demand_sum*the_scenario.unMetDemandPenalty
-            logger.result(
-                "Total Scenario Cost = (transportation + unmet demand penalty + processor construction + operation+ catalyst replacement): \t ${0:,.0f}"
-                "".format(costs_daily))
-            
-        np.save("costs_daily.npy", costs_daily)
-        logger.info("costs_daily: {}".format(costs_daily))
-
-        if optimal_unmet_demand_sum < 0:
-            costs_yearly = abs(float(value(prob.objective))- optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty) + sum(CatalystReplace_cost[:,t+1,i]) + operation_cost*((1.03)**(t+13))
-
-            logger.result(
-                "Total Scenario Cost = (transportation + processor construction + operation + catalyst replacement): \t ${0:,.0f}"
-                "".format(costs_yearly))
-        else:
-            costs_yearly = abs(float(value(prob.objective))-optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty)+sum(CatalystReplace_cost[:,t+1,i])+operation_cost*((1.03)**(t+13))+optimal_unmet_demand_sum*the_scenario.unMetDemandPenalty
-            logger.result(
-                "Total Scenario Cost = (transportation + unmet demand penalty + processor construction + operation+ catalyst replacement): \t ${0:,.0f}"
-                "".format(costs_yearly))
-            
-        np.save("costs_yearly.npy", costs_yearly)        
-        logger.info("costs_yearly: {}".format(costs_yearly))
         # END MODIFICATION
 
-        sql = "select count(variable_name) from optimal_solution where variable_name like 'Edge%';"
-        data = db_con.execute(sql)
-        optimal_edges_count = data.fetchone()[0]
-        logger.info("number of optimal edges: {}".format(optimal_edges_count))
-
-    # logger.info("Total Cost of building and transporting : \t ${0:,.0f}".format(
-    #    float(value(prob.objective)) - optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty))
-    logger.info(
-        "Total Scenario Cost = (transportation + unmet demand penalty + "
-        "processor construction): \t ${0:,.0f}".format(
-            float(value(prob.objective))))
-
-    logger.info(
-        "FINISH: save_pulp_solution: Runtime (HMS): \t{}".format(ftot_supporting.get_total_runtime_string(start_time)))
-
-def save_pulp_solution(the_scenario, prob, logger, time_period, zero_threshold=0.00001):
-
-    # BEGIN MODIFICATION - logging
-    i = np.load("scenario_num.npy")
-    t = np.load("time_horizon.npy")
-    logger.info("scenario {}".format(i))
-    logger.info("time horizon {}".format(t))
-    if time_period == "weekly" :
-        j = np.load("earthquake_week.npy")
-        logger.info("earthquake week {}".format(j))
-    # END MODIFICATION
-
-
-    import datetime
-    start_time = datetime.datetime.now()
-    logger.info("START: save_pulp_solution")
-    non_zero_variable_count = 0
-
-    with sqlite3.connect(the_scenario.main_db) as db_con:
-
-        db_cur = db_con.cursor()
-        # drop  the optimal_solution table
-        # -----------------------------
-        db_cur.executescript("drop table if exists optimal_solution;")
-
-        # create the optimal_solution table
-        # -----------------------------
-        db_cur.executescript("""
-                                create table optimal_solution
-                                (
-                                    variable_name string,
-                                    variable_value real
-                                );
-                                """)
-
-        # insert the optimal data into the DB
-        # -------------------------------------
-        for v in prob.variables():
-            if v.varValue > zero_threshold:  # eliminates values too close to zero
-                sql = """insert into optimal_solution  (variable_name, variable_value) values ("{}", {});""".format(
-                    v.name, float(v.varValue))
-                db_con.execute(sql)
-                non_zero_variable_count = non_zero_variable_count + 1
-
-        # query the optimal_solution table in the DB for each variable we care about
-        # ----------------------------------------------------------------------------
-        sql = "select count(variable_name) from optimal_solution where variable_name like 'BuildProcessor%';"
-        data = db_con.execute(sql)
-        optimal_processors_count = data.fetchone()[0]
-        logger.info("number of optimal_processors: {}".format(optimal_processors_count))
-
-        sql = "select count(variable_name) from optimal_solution where variable_name like 'UnmetDemand%';"
-        data = db_con.execute(sql)
-        optimal_unmet_demand_count = data.fetchone()[0]
-        logger.info("number facilities with optimal_unmet_demand : {}".format(optimal_unmet_demand_count))
-        sql = "select ifnull(sum(variable_value),0) from optimal_solution where variable_name like 'UnmetDemand%';"
-        data = db_con.execute(sql)
-        optimal_unmet_demand_sum = data.fetchone()[0]
-        
-        # BEGIN MODIFICATION - save unmet demand
-        if time_period == "yearly":
-            unmet_demand_yearly = optimal_unmet_demand_sum
-            np.save("unmet_demand_yearly.npy", unmet_demand_yearly)
-
-            UnmetDemandAmount = np.load("UnmetDemandAmount.npy")
-            for j in range (len(UnmetDemandAmount)):
-                UnmetDemandAmount[j][t][i] = optimal_unmet_demand_sum*daily_index
-            np.save("UnmetDemandAmount.npy",UnmetDemandAmount)
-        
-        else: #weekly
-            unmet_demand_daily = optimal_unmet_demand_sum
-            np.save("unmet_demand_daily.npy", unmet_demand_daily)
-            logger.info("Repair Cost : {}".format(repair_costs[int(j*7)][t][i]))
-        # END MODIFICATION        
-            
         logger.info("Total Unmet Demand : {}".format(optimal_unmet_demand_sum))
+        
+        # MODIFICATION
         logger.info("Catalyst Replacement : {}".format(sum(CatalystReplace_cost[:,t+1,i]))) #MODIFICATION
+                
         logger.info("Penalty per unit of Unmet Demand : ${0:,.0f}".format(the_scenario.unMetDemandPenalty))
-        logger.info("Total Cost of Unmet Demand : \t ${0:,.0f}".format(
-            optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty))
-        logger.info("Total Cost of building and transporting : \t ${0:,.0f}".format(abs(float(value(prob.objective))- optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty)))
+        
+        # Log breakdown
+        logger.result("Routing and Build Cost: \t {0:,.0f}".format(float(value(prob.objective)) - optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty))
+        logger.result("Total Unmet Demand Penalty: \t {0:,.0f}".format(optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty))
 
         # BEGIN MODIFICATION
-        #logger.info("Total Cost of building and transporting and operation : \t ${0:,.0f}".format(
-            #float(value(prob.objective)) - optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty +operation_cost*((1.03)**(t+13))))
-        #=================================non consider the UDP when UD < 0======================================
         if time_period == "weekly":
             if optimal_unmet_demand_sum < 0:
                 costs_daily = abs(float(value(prob.objective))- optimal_unmet_demand_sum * the_scenario.unMetDemandPenalty) + sum(CatalystReplace_cost[:,t+1,i])*daily_index + operation_cost*((1.03)**(t+13))*daily_index + repair_costs[int(j*7)][t][i]
@@ -1648,7 +1431,6 @@ def save_pulp_solution(the_scenario, prob, logger, time_period, zero_threshold=0
                 
             np.save("costs_yearly.npy", costs_yearly)        
             logger.info("costs_yearly: {}".format(costs_yearly))
-
         # END MODIFICATION 
 
         sql = "select count(variable_name) from optimal_solution where variable_name like 'Edge%';"
@@ -1656,13 +1438,8 @@ def save_pulp_solution(the_scenario, prob, logger, time_period, zero_threshold=0
         optimal_edges_count = data.fetchone()[0]
         logger.info("number of optimal edges: {}".format(optimal_edges_count))
 
-
-    logger.info(
-        "Total Scenario Cost = (transportation + unmet demand penalty + "
-        "processor construction): \t ${0:,.0f}".format(
-            float(value(prob.objective))))
-
     logger.info(
         "FINISH: save_pulp_solution: Runtime (HMS): \t{}".format(ftot_supporting.get_total_runtime_string(start_time)))
+
 
 # ===============================================================================

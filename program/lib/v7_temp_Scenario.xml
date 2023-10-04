@@ -1,27 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Document created with online XML Editor http://xmlgrid.net 2018/11/09 15:39:47 -->
 <Scenario xmlns="Schema_v7.0.0">
     <Scenario_Schema_Version>7.0.2</Scenario_Schema_Version>
-    <Scenario_Name>SCR Forest Residuals</Scenario_Name>
-    <Scenario_Description>Forest Residuals to jet fuel supply chain resilience assessment.</Scenario_Description>
+    <Scenario_Name>USER INPUT REQUIRED: replace this string with a descriptive Scenario Name</Scenario_Name>
+    <Scenario_Description>USER INPUT REQUIRED: replace this string with a Scenario Description</Scenario_Description>
     <Scenario_Inputs>
-        <Common_Data_Folder>C:\FTOT\scenarios\common_data</Common_Data_Folder>
+        <Common_Data_Folder>USER INPUT REQUIRED</Common_Data_Folder>
         <!-- MULTIMODAL NETWORK LOCATION -->
         <!-- The original copy of the base network. FTOT will not alter this copy. -->
         <!-- The default multimodal network used in FTOT is provided with the tool and includes the following modes: road, rail, water, product pipeline, and crude oil pipeline. -->
         <!-- The multimodal network also contains waterway lock and multimodal facility locations. -->
         <!-- Units for link length in the network must match the default distance units specified further down in the XML. -->
-        <Base_Network_Gdb>C:\FTOT\scenarios\common_data\networks\FTOT_Public_US_Contiguous_Network_v2023.gdb</Base_Network_Gdb>
+        <Base_Network_Gdb>USER INPUT REQUIRED</Base_Network_Gdb>
         <Disruption_Data>None</Disruption_Data>
         <!-- GEOSPATIAL FACILITY INFORMATION -->
         <!-- The original copy of the facility geospatial information. -->
         <!-- FTOT will not alter this copy. -->
-        <Base_RMP_Layer>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_GISdata\facilities.gdb\rmp</Base_RMP_Layer>
-        <Base_Destination_Layer>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_GISdata\facilities.gdb\dest</Base_Destination_Layer>
-        <Base_Processors_Layer>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_GISdata\facilities.gdb\proc</Base_Processors_Layer>
+        <Base_RMP_Layer>USER INPUT REQUIRED</Base_RMP_Layer>
+        <Base_Destination_Layer>USER INPUT REQUIRED</Base_Destination_Layer>
+        <Base_Processors_Layer>None</Base_Processors_Layer>
         <!-- FACILITY COMMODITY INFORMATION -->
         <!-- CSV Files that map facility_name to the commodity quantities, units, and inputs/outputs (i/o) -->
-        <RMP_Commodity_Data>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_data\rmp.csv</RMP_Commodity_Data>
-        <Destinations_Commodity_Data>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_data\dest.csv</Destinations_Commodity_Data>
-        <Processors_Commodity_Data>C:\FTOT-SCR\scenarios\ForestResiduals_SCR\input_data\proc.csv</Processors_Commodity_Data>
+        <RMP_Commodity_Data>USER INPUT REQUIRED</RMP_Commodity_Data>
+        <Destinations_Commodity_Data>USER INPUT REQUIRED</Destinations_Commodity_Data>
+        <Processors_Commodity_Data>None</Processors_Commodity_Data>
         <Processors_Candidate_Commodity_Data>None</Processors_Candidate_Commodity_Data>
         <Schedule_Data>None</Schedule_Data>
         <Commodity_Mode_Data>None</Commodity_Mode_Data>
@@ -91,7 +93,7 @@
                     <!-- Default road impedance categories are based on FAF Function Class (e.g., interstates versus local roads). -->
                     <!-- Default rail impedance categories are based on publicly available rail ownership data and whether or not the rail segment is part of STRACNET. -->
                     <!-- Default water impedance categories are based on publicly available USACE freight volumes over the national waterway network. -->
-                    <Impedance_Weights_Data>C:\FTOT\scenarios\common_data\networks\default_impedance_weights.csv</Impedance_Weights_Data>
+                    <Impedance_Weights_Data>USER INPUT REQUIRED</Impedance_Weights_Data>
                 </Modal_Costs>
                 <Intermodal_Transloading_Costs>
                     <liquid_Transloading_Cost>40.00 usd/thousand_gallon</liquid_Transloading_Cost>
@@ -102,11 +104,11 @@
                 <!-- Since facilities are not always located directly on the multimodal network, artificial links must be used to connect facilities to the network -->
                 <!-- A reasonable default is 5 miles, though longer artificial link distances can be conceivably used, particularly for the pipeline network where there is the least amount of detail -->
                 <!-- Shorter artificial link distances can be used when the facilities are known to be located directly on or adjacent to the relevant network modes -->
-                <Road_Max_Artificial_Link_Distance>10 mi</Road_Max_Artificial_Link_Distance>
-                <Rail_Max_Artificial_Link_Distance>10 mi</Rail_Max_Artificial_Link_Distance>
-                <Water_Max_Artificial_Link_Distance>10 mi</Water_Max_Artificial_Link_Distance>
-                <Pipeline_Crude_Max_Artificial_Link_Distance>10 mi</Pipeline_Crude_Max_Artificial_Link_Distance>
-                <Pipeline_Products_Max_Artificial_Link_Distance>10 mi</Pipeline_Products_Max_Artificial_Link_Distance>
+                <Road_Max_Artificial_Link_Distance>5 mi</Road_Max_Artificial_Link_Distance>
+                <Rail_Max_Artificial_Link_Distance>5 mi</Rail_Max_Artificial_Link_Distance>
+                <Water_Max_Artificial_Link_Distance>5 mi</Water_Max_Artificial_Link_Distance>
+                <Pipeline_Crude_Max_Artificial_Link_Distance>5 mi</Pipeline_Crude_Max_Artificial_Link_Distance>
+                <Pipeline_Products_Max_Artificial_Link_Distance>5 mi</Pipeline_Products_Max_Artificial_Link_Distance>
                 <!-- The following True/False flag determines whether artificial links will be included in  calculations for report metrics.-->
                 <!-- The default is for artificial links to be excluded from the main report calculations.-->
                 <Report_With_Artificial_Links>False</Report_With_Artificial_Links>
